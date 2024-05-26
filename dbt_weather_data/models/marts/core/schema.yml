@@ -1,7 +1,7 @@
 
 
 models:
-  - name: dimLocation
+  - name: dim_location
     description: dim table for all locations
     columns:
       - name: location_id

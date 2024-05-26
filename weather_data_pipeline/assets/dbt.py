@@ -1,5 +1,5 @@
-from dagster import AssetExecutionContext
-from dagster_dbt import dbt_assets, DbtCliResource
+from dagster import AssetExecutionContext, AssetKey
+from dagster_dbt import dbt_assets, DbtCliResource, DagsterDbtTranslator
 from ..resources import dbt_resource
 
 import os
@@ -18,8 +18,6 @@ if os.getenv("DAGSTER_DBT_PARSE_PROJECT_ON_LOAD"):
     )
 else:
     dbt_manifest_path = os.path.join(DBT_DIRECTORY, "target", "manifest.json")  
-
-
 
 @dbt_assets(
   manifest=dbt_manifest_path

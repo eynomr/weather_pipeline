@@ -1,0 +1,15 @@
+version: 2
+
+sources:
+  - name: stage
+    database: weather_db
+    schema: public_stage
+    tables:
+      - name: stg_location
+        description: raw table for location data
+    tables:
+      - name: raw_weather_actual
+        description: raw table for actual weather data
+        meta:
+          dagster:
+            asset_key: ["raw_weather_actual"]

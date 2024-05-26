@@ -33,11 +33,13 @@ clean-targets:         # directories to be removed by `dbt clean`
 
 models:
   dbt_weather_data:
-    staging:
-      +schema: staging
+    +schema: public
+    stage:
+      +schema: stage
+      materialized: table
     marts:
       +schema: analytics
 
 seeds:
   dbt_weather_data:
-    +schema: staging
+    +schema: stage

@@ -34,8 +34,12 @@ class PostgresResource(ConfigurableResource):
   def execute_query(self, query: str, params: tuple = None):
     connection = self.get_connection()
     with connection.cursor() as cursor:
-      cursor.execute(query)
-      return cursor.fetchall()
+      cursor.execute(query, params)
+      if cursor.description:
+        return cursor.fetchall()
+      else:
+        connection.commit()
+        return None
   
 
 class OpenWeatherMapResource(ConfigurableResource):
@@ -46,10 +50,10 @@ class OpenWeatherMapResource(ConfigurableResource):
 
   def get_actual_weather(self, lat: float, long: float) -> Response:
     return requests.get(
-      f"https://api.openweathermap.org/data/2.5/weather?lat={lat}&lon={long}&appid={self.api_key}&metric=imperial"
+      f"https://api.openweathermap.org/data/2.5/weather?lat={lat}&lon={long}&appid={self.api_key}&units=imperial"
     )
   
   def get_forecast_weather(self, lat: float, long: float) -> Response:
     return requests.get(
-      f"https://api.openweathermap.org/data/2.5/forecast?lat={lat}&lon={long}&appid={self.api_key}&metric=imperial"
+      f"https://api.openweathermap.org/data/2.5/forecast?lat={lat}&lon={long}&appid={self.api_key}&units=imperial"
     )
