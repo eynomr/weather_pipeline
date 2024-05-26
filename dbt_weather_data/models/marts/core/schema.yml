@@ -1,0 +1,26 @@
+
+
+models:
+  - name: dimLocation
+    description: dim table for all locations
+    columns:
+      - name: location_id
+        description: unique identifier for each location
+        tests:
+          - unique
+      - name: country_code
+        description: name of the location
+        tests:
+          - not_null
+      - name: city_name
+        description: country of the location
+        tests:
+          - not_null
+      - name: latitude
+        description: latitude of the location
+        tests:
+          - not_null
+      - name: longitude
+        description: longitude of the location
+        tests:
+          - not_null
