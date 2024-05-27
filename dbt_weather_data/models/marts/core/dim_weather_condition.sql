@@ -6,10 +6,17 @@
 }}
 
 with distinct_conditions as (
-  select distinct
-  weather_condition,
-  condition_description
-  from {{ ref('stg_weather_actual') }}
+  select distinct weather_condition, condition_description from (
+    select distinct
+    weather_condition,
+    condition_description
+    from {{ ref('stg_weather_actual') }}
+    union all
+    select distinct
+    weather_condition,
+    condition_description
+    from {{ ref('stg_weather_forecast') }}
+  ) a
 )
 select
   row_number() over() as condition_id,

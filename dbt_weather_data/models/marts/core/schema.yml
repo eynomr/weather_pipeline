@@ -24,3 +24,242 @@ models:
         description: longitude of the location
         tests:
           - not_null
+  
+  - name: dim_weather_condition
+    description: dim table for all weather conditions
+    columns:
+      - name: condition_id
+        description: unique identifier for each weather condition
+        tests:
+          - unique
+      - name: condition
+        description: name of the weather condition
+        tests:
+          - not_null
+      - name: description
+        description: group of the weather condition
+        tests:
+          - not_null
+    tests:
+      - unique:
+          column_name: "(condition || '-' || description)"
+
+  - name: dim_datetime
+    description: dim table for all datetimes
+    columns:
+      - name: datetime_id
+        description: unique identifier for each datetime
+        tests:
+          - unique
+      - name: date
+        description: datetime
+        tests:
+          - not_null
+          - unique
+      - name: year
+        description: year of the datetime
+        tests:
+          - not_null
+      - name: month
+        description: month of the datetime
+        tests:
+          - not_null
+      - name: day
+        description: day of the datetime
+        tests:
+          - not_null
+      - name: hour
+        description: hour of the datetime
+        tests:
+          - not_null
+      - name: minute
+        description: minute of the datetime
+        tests:
+          - not_null
+      - name: second
+        description: second of the datetime
+        tests:
+          - not_null
+      - name: day_of_week
+        description: day of the week of the datetime
+        tests:
+          - not_null
+      - name: is_weekend
+        description: boolean if the datetime is a weekend
+        tests:
+          - not_null
+          - accepted_values:
+              values: [0, 1]
+              quote: false
+
+  - name: fact_weather_actual
+    description: fact table for actual weather data
+    columns:
+      - name: weather_id
+        description: unique identifier for each weather
+        tests:
+          - unique
+      - name: location_id
+        description: unique identifier for each location, foreign key to dim_location
+        tests:
+          - not_null
+          - relationships:
+              to: ref('dim_location')
+              field: location_id
+      - name: datetime_id
+        description: unique identifier for each datetime, foreign key to dim_datetime
+        tests:
+          - not_null
+          - relationships:
+              to: ref('dim_datetime')
+              field: datetime_id
+      - name: condition_id
+        description: unique identifier for each weather condition, foreign key to dim_weather_condition
+        tests:
+          - not_null
+          - relationships:
+              to: ref('dim_weather_condition')
+              field: condition_id
+      - name: temp
+        description: temperature of the weather
+        tests:
+          - not_null
+      - name: feels_like
+        description: feels like temperature of the weather
+        tests:
+          - not_null
+      - name: temp_min
+        description: minimum temperature of the weather
+        tests:
+          - not_null
+      - name: temp_max
+        description: maximum temperature of the weather
+        tests:
+          - not_null
+      - name: pressure
+        description: pressure of the weather
+        tests:
+          - not_null
+      - name: humidity
+        description: humidity of the weather
+        tests:
+          - not_null
+      - name: sea_level
+        description: sea level of the weather
+      - name: ground_level
+        description: ground level of the weather
+      - name: visibility
+        description: visibility of the weather
+        tests:
+          - not_null
+      - name: wind_speed
+        description: wind speed of the weather
+        tests:
+          - not_null
+      - name: wind_degree
+        description: wind degree of the weather
+        tests:
+          - not_null
+      - name: wind_gust
+        description: wind gust of the weather        
+      - name: cloudiness
+        description: cloudiness of the weather
+      - name: rain_1h
+        description: rain in the last hour of the weather
+      - name: rain_3h
+        description: rain in the last 3 hours of the weather
+      - name: snow_1h
+        description: snow in the last hour of the weather
+      - name: snow_3h
+        description: snow in the last 3 hours of the weather
+
+      
+  - name: fact_weather_forecast
+    description: fact table for forecast weather data
+    columns:
+      - name: forecast_id
+        description: unique identifier for each forecast
+        tests:
+          - unique
+      - name: location_id
+        description: unique identifier for each location, foreign key to dim_location
+        tests:
+          - not_null
+          - relationships:
+              to: ref('dim_location')
+              field: location_id
+      - name: datetime_id
+        description: unique identifier for each datetime, foreign key to dim_datetime
+        tests:
+          - not_null
+          - relationships:
+              to: ref('dim_datetime')
+              field: datetime_id
+      - name: condition_id
+        description: unique identifier for each weather condition, foreign key to dim_weather_condition
+        tests:
+          - not_null
+          - relationships:
+              to: ref('dim_weather_condition')
+              field: condition_id
+      - name: temp
+        description: forecasted temperature of the weather
+        tests:
+          - not_null
+      - name: feels_like
+        description:  forecasted feels like temperature of the weather
+        tests:
+          - not_null
+      - name: temp_min
+        description: minimum forecasted temperature of the weather
+        tests:
+          - not_null
+      - name: temp_max
+        description: maximum forecasted temperature of the weather
+        tests:
+          - not_null
+      - name: pressure
+        description: forecasted pressure of the weather
+        tests:
+          - not_null
+      - name: humidity
+        description: forecasted humidity of the weather
+        tests:
+          - not_null
+      - name: sea_level
+        description: sea level of the weather
+      - name: ground_level
+        description: ground level of the weather
+      - name: visibility
+        description: visibility of the weather
+        tests:
+          - not_null
+      - name: wind_speed
+        description: wind speed of the weather
+        tests:
+          - not_null
+      - name: wind_degree
+        description: wind degree of the weather
+        tests:
+          - not_null
+      - name: wind_gust
+        description: wind gust of the weather        
+      - name: cloudiness
+        description: cloudiness of the weather
+      - name: rain_1h
+        description: rain in the last hour of the weather
+      - name: rain_3h
+        description: rain in the last 3 hours of the weather
+      - name: snow_1h
+        description: snow in the last hour of the weather
+      - name: snow_3h
+        description: snow in the last 3 hours of the weather
+      - name: precipitation_probability
+        description: precipitation probability of the weather
+        tests:
+          - not_null
+      - name: ingestion_datetime
+        description: datetime of the forecast data ingestion
+        tests:
+          - not_null
+          - unique

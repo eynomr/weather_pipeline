@@ -6,10 +6,14 @@ sources:
     schema: public_stage
     tables:
       - name: stg_location
-        description: raw table for location data
-    tables:
+        description: raw table for location data    
       - name: raw_weather_actual
         description: raw table for actual weather data
         meta:
           dagster:
-            asset_key: ["raw_weather_actual"]
+            asset_key: ["raw_weather_actual"]    
+      - name: raw_weather_forecast
+        description: raw table for forecast weather data
+        meta:
+          dagster:
+            asset_key: ["raw_weather_forecast"]

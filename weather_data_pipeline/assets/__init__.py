@@ -7,10 +7,9 @@ from dagster_dbt import (
   DbtCliResource,
   dbt_assets
 )
-from . import ingestion, core
+from . import ingestion
 
 DBT_PROJECT_DIR = Path(__file__).joinpath("..", "..", "..", "dbt_weather_data").resolve()
 
 ingestion_assets = load_assets_from_package_module(package_module=ingestion, group_name="ingestion")
-core_assets = load_assets_from_package_module(package_module=core, group_name="core")
 
