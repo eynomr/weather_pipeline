@@ -62,7 +62,7 @@ class OpenWeatherMapResource(ConfigurableResource):
         f"https://api.openweathermap.org/data/2.5/weather?lat={lat}&lon={long}&appid={self.api_key}&units=imperial"
       )
       response.raise_for_status()
-      return response
+      return response.json()
     except RequestException as e:
       raise RetryRequested(max_retries=3, seconds_to_wait=60*5) from e
     except Exception as e:
@@ -80,7 +80,7 @@ class OpenWeatherMapResource(ConfigurableResource):
         f"https://api.openweathermap.org/data/2.5/forecast?lat={lat}&lon={long}&appid={self.api_key}&units=imperial"
       )
       response.raise_for_status()
-      return response
+      return response.json()
     except RequestException as e:
       raise RetryRequested(max_retries=3, seconds_to_wait=60*5) from e
     except Exception as e:

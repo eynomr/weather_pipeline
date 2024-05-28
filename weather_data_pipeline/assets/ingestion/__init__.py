@@ -19,6 +19,10 @@ import datetime
         deps=[["dbt_schema", "analytics", "dim_location"]]
 )
 def all_locations(postgres: PostgresResource) -> pd.DataFrame:
+    """
+    Fetches all locations from the database.
+    Resource: PostgresResource
+    """
     data = postgres.execute_query("SELECT location_id, latitude, longitude FROM public_analytics.dim_location")
     # df = all_locations
     yield AssetMaterialization(asset_key="all_locations", description="Fetched all locations from the database")
@@ -27,15 +31,20 @@ def all_locations(postgres: PostgresResource) -> pd.DataFrame:
 
 @asset(
         compute_kind="python",
-        description="Fetches weather data from OpenWeather API"
+        description="Fetches weather data from OpenWeather API",
+        metadata={"api": "OpenWeatherMap API v2.5"}
 )
 def fetch_weather_actual(context: AssetExecutionContext, all_locations, open_weather_map: OpenWeatherMapResource) -> pd.DataFrame:
+    """
+    Fetches actual data from OpenWeather API.
+    Resource: OpenWeatherMapResource
+    """
     weather_data = []
+    context.log.info(f"Fetching actual data for {len(all_locations)} locations")
     for location in all_locations:
         location_id, lat, long = location        
         try:
-            response = open_weather_map.get_actual_weather(lat=lat, long=long)                      
-            data = response.json()
+            data = open_weather_map.get_actual_weather(lat=lat, long=long)                      
             weather_data.append({
                 "location_id": location_id,
                 "weather_type": data['weather'][0]['main'],
@@ -74,9 +83,14 @@ def fetch_weather_actual(context: AssetExecutionContext, all_locations, open_wea
 
 @asset(
         compute_kind="python",
-        description="Loads raw weather data into the database"
+        description="Loads raw weather data into the database",
+        metadata={"schema": "public_stage", "table": "raw_weather_actual"}
 )
 def raw_weather_actual(context: AssetExecutionContext, fetch_weather_actual, postgres: PostgresResource):
+    """
+    Loads the raw fetched actual data into the database.
+    Resource: PostgresResource
+    """
     query = """
         INSERT INTO public_stage.raw_weather_actual(
             location_id, 
@@ -143,16 +157,20 @@ def raw_weather_actual(context: AssetExecutionContext, fetch_weather_actual, pos
 
 @asset(
         compute_kind="python",
-        description="Fetches forecast data from OpenWeather API"
+        description="Fetches forecast data from OpenWeather API",
+        metadata={"api": "OpenWeatherMap API v2.5"}
 )
 def fetch_weather_forecast(context: AssetExecutionContext, all_locations, open_weather_map: OpenWeatherMapResource) -> pd.DataFrame:
+    """
+    Fetches forecast data from OpenWeather API.
+    Resource: OpenWeatherMapResource
+    """
     weather_data = []
+    context.log.info(f"Fetching forecast data for {len(all_locations)} locations")
     for location in all_locations:
-        location_id, lat, long = location
-        context.log.info(location)
+        location_id, lat, long = location        
         try:
-            response = open_weather_map.get_forecast_weather(lat=lat, long=long)                      
-            data = response.json()
+            data = open_weather_map.get_forecast_weather(lat=lat, long=long)                      
             data = data['list']
             for data in data:
                 weather_data.append({
@@ -192,9 +210,14 @@ def fetch_weather_forecast(context: AssetExecutionContext, all_locations, open_w
 
 @asset(
         compute_kind="python",
-        description="Loads raw forecast data into the database"
+        description="Loads raw forecast data into the database",
+        metadata={"schema": "public_stage", "table": "raw_weather_forecast"}
 )
 def raw_weather_forecast(context: AssetExecutionContext, fetch_weather_forecast, postgres: PostgresResource):
+    """
+    Loads the raw fetched forecast data into the database.
+    Resouce: PostgresResource
+    """
     query = """
         INSERT INTO public_stage.raw_weather_forecast(
             location_id, 
