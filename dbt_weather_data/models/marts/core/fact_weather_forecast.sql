@@ -1,7 +1,10 @@
 {{
   config(
     materialized='incremental',
-    unique_key='forecast_id',
+    unique_key=['location_id', 'datetime_id'],
+    indexes=[
+      {'columns': ['location_id', 'datetime_id']}
+    ]
   )
 }}
 
@@ -39,6 +42,6 @@ join {{ ref('dim_weather_condition') }} as dim_weather_condition
   on forecast_stage.weather_condition = dim_weather_condition.condition 
   and forecast_stage.condition_description = dim_weather_condition.description
 {% if is_incremental() %}
-where forecast_id > (select max(forecast_id) from {{ this }})
+where ingestion_datetime > (select max(ingestion_datetime) from {{ this }})
 {% endif %}
  

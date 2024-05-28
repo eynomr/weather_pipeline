@@ -2,6 +2,9 @@
   config(
     materialized='incremental',
     unique_key='condition_id',
+    indexes=[
+      {'columns': ['condition_id', 'condition']}
+    ]
   )
 }}
 
@@ -24,5 +27,5 @@ select
   condition_description as description
 from distinct_conditions
 {% if is_incremental() %}
-where weather_condition || condition_description not in (select weather_condition || condition_description from {{ this }})
+where weather_condition || condition_description not in (select condition || description from {{ this }})
 {% endif %}

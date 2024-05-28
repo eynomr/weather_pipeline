@@ -27,6 +27,7 @@ select
   snow_3h,
   observation_datetime,
   sunrise,
-  sunset
+  sunset,
+  ingestion_datetime
  from source
 

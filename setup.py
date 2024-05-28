@@ -6,10 +6,13 @@ setup(
     install_requires=[
         "dagster",
         "dagster-cloud",
+        "dagster-postgres",
+        "dagster-slack",
         "pandas",
         "dbt-postgres",
-        "dagster-postgres",
         "psycopg2",
+        "ratelimit",
+        "tenacity",
     ],
     extras_require={"dev": ["dagster-webserver", "pytest"]},
 )

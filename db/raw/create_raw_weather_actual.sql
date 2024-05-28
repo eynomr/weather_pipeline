@@ -22,5 +22,6 @@ CREATE TABLE IF NOT EXISTS public_stage.raw_weather_actual (
     snow_3h FLOAT,
     observation_datetime TIMESTAMP,
     sunrise TIMESTAMP,
-    sunset TIMESTAMP
+    sunset TIMESTAMP,
+    ingestion_datetime TIMESTAMP
 );

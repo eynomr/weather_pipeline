@@ -1,41 +1,40 @@
 import os
 
-from dagster import Definitions, load_assets_from_modules, define_asset_job, ScheduleDefinition
+from dagster import (
+  Definitions,  
+  RunFailureSensorContext
+)
+from dagster_slack import SlackResource, make_slack_on_run_failure_sensor
 from .assets import (
   ingestion_assets,
-  dbt
+)
+from .assets.dbt import (
+  dbt_project_assets,
+  dbt_resource
 )
 from .resources import dbt_resource, OpenWeatherMapResource, PostgresResource
+from .jobs import actual_weather_job, forecast_weather_job
+from .schedules import hourly_actual_weather_schedule, daily_forecast_weather_schedule
 
 
 """ASSETS DEFINITIONS"""
-dbt_data_assets = load_assets_from_modules(modules=[dbt], group_name="dbt")
-
 all_assets = [
   *ingestion_assets,
-  *dbt_data_assets
+  dbt_project_assets
 ]
 
 
-"""JOB DEFINITIONS"""
-actual_weather_job = define_asset_job(
-  name="actua_weather_job",
-  selection=[
-    "all_locations",
-    "fetch_weather_actual",
-    "raw_weather_actual",
-    "stage/stg_weather_actual",
-    "analytics/dim_datetime",
-    "analytics/dim_weather_condition",
-    "analytics/fact_weather_actual"
-  ]
-)
+"""SLACK MONITORING"""
+def slack_message_fn(context: RunFailureSensorContext):
+  return (
+    f"Job {context.dagster_run.job_name} failed!"
+    f"Error: {context.failure_event.message}"
+  )
 
-"""SCHEDULE DEFINITIONS"""
-hourly_actual_weather_schedule = ScheduleDefinition(
-  name="hourly_actual_weather_schedule",
-  cron_schedule="0 * * * *",
-  job=actual_weather_job
+slack_on_run_failure = make_slack_on_run_failure_sensor(
+  channel="#analytics",
+  slack_token=os.getenv("SLACK_TOKEN"),
+  text_fn=slack_message_fn,
 )
 
 """DEFINITIONS"""
@@ -44,16 +43,20 @@ defs = Definitions(
     resources={
       "dbt": dbt_resource,
       "postgres": PostgresResource(
-        host=os.getenv("POSTGRES_HOST"),
-        port=int(os.getenv("POSTGRES_PORT")),
-        database=os.getenv("POSTGRES_DATABASE"),
-        user=os.getenv("POSTGRES_USER"),
-        password=os.getenv("POSTGRES_PASSWORD"),
+        host=os.getenv("POSTGRES_HOST", "localhost"),
+        port=int(os.getenv("POSTGRES_PORT", 5432)),
+        database=os.getenv("POSTGRES_DATABASE", "weather"),
+        user=os.getenv("POSTGRES_USER", "postgres"),
+        password=os.getenv("POSTGRES_PASSWORD", "password"),
       ),
       "open_weather_map": OpenWeatherMapResource(
-          api_key=os.getenv("OPEN_WEATHER_MAP_API_KEY")
-        )
+          api_key=os.getenv("OPEN_WEATHER_MAP_API_KEY", "api_key")
+      ),
+      "slack": SlackResource(
+        token=os.getenv("SLACK_TOKEN", "token"),        
+      )
       },
-    jobs=[actual_weather_job],
-    schedules=[hourly_actual_weather_schedule]
+    jobs=[actual_weather_job, forecast_weather_job],
+    schedules=[hourly_actual_weather_schedule, daily_forecast_weather_schedule],
+    sensors=[slack_on_run_failure]
 )

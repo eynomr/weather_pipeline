@@ -5,7 +5,7 @@ models:
     description: dim table for all locations
     columns:
       - name: location_id
-        description: unique identifier for each location
+        description: unique identifier for each location      
         tests:
           - unique
       - name: country_code
@@ -76,6 +76,8 @@ models:
         description: minute of the datetime
         tests:
           - not_null
+          - accepted_values:
+              values: [0, 30]
       - name: second
         description: second of the datetime
         tests:
