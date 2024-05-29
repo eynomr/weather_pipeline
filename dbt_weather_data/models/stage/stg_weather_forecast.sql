@@ -1,3 +1,13 @@
+{{
+  config(
+    materialized='table',
+    indexes=[
+      {'columns': ['forecast_id', 'forecast_datetime', 'ingestion_datetime']}
+    ],
+  )
+}}
+
+
 with source as (
   select * 
   from {{ source('stage', 'raw_weather_forecast') }}

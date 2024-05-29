@@ -1,10 +1,11 @@
 {{
   config(
     materialized='incremental',
-    unique_key=['location_id', 'datetime_id'],
+    unique_key=['forecast_id', 'location_id', 'datetime_id'],
     indexes=[
-      {'columns': ['location_id', 'datetime_id']}
-    ]
+      {'columns': ['forecast_id', 'location_id', 'datetime_id']}
+    ],
+    on_schema_change='sync_all_columns'
   )
 }}
 
@@ -14,7 +15,7 @@ with forecast_stage as (
 )
 
 select 
-  forecast_id,
+  location_id::text || '_' || dim_datetime.datetime_id::text as forecast_id,
   location_id,
   dim_datetime.datetime_id,
   dim_weather_condition.condition_id,

@@ -1,3 +1,12 @@
+{{
+  config(
+    materialized='table',
+    indexes=[
+      {'columns': ['weather_id', 'observation_datetime', 'ingestion_datetime']}
+    ],
+  )
+}}
+
 with source as (
   select * 
   from {{ source('stage', 'raw_weather_actual') }}
@@ -25,7 +34,10 @@ select
   rain_3h,
   snow_1h,
   snow_3h,
-  observation_datetime,
+  case 
+    when extract('minute' from observation_datetime) < 30 then date_trunc('hour', observation_datetime)
+    else date_trunc('hour', observation_datetime) + interval '30 minutes'
+  end as observation_datetime,
   sunrise,
   sunset,
   ingestion_datetime
