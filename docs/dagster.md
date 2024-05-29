@@ -1,4 +1,4 @@
-<img src="https://dagster.io/images/brand/logos/dagster-primary-horizontal.svg" alt="Dagster Icon" width="100" height="100">
+<img src="https://dagster.io/images/brand/logos/dagster-primary-horizontal.svg" alt="Dagster Icon" width="100" height="40">
 
 ## Overview
 We are using dagster to orchestrate the data pipeline, schedule and execute jobs, and manage our data using dagster's software define assets. The dagster project is integrated with my dbt project and utilizes dbt assets for data transformation. 
