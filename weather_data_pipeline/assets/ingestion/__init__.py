@@ -46,7 +46,7 @@ def fetch_weather_actual(context: AssetExecutionContext, all_locations, open_wea
         try:
             data = open_weather_map.get_actual_weather(lat=lat, long=long)                      
             weather_data.append({
-                "location_id": location_id,
+                "location_id": location_id, # from dim_location
                 "weather_type": data['weather'][0]['main'],
                 "weather_description": data['weather'][0]['description'],                
                 "temp": data['main']['temp'],
@@ -174,7 +174,7 @@ def fetch_weather_forecast(context: AssetExecutionContext, all_locations, open_w
             data = data['list']
             for data in data:
                 weather_data.append({
-                    "location_id": location_id,
+                    "location_id": location_id, # from dim_location
                     "weather_type": data['weather'][0]['main'],
                     "weather_description": data['weather'][0]['description'],                
                     "temp": data['main']['temp'],

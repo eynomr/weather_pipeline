@@ -1,13 +1,9 @@
 from dagster import build_asset_context, ResourceDefinition, AssetMaterialization, Output
 from unittest import mock
 from weather_data_pipeline.assets.ingestion import (
-  all_locations,
   fetch_weather_actual,
 )
-from datetime import datetime
 from weather_data_pipeline.resources import OpenWeatherMapResource
-import pandas as pd
-import json
 
 
 

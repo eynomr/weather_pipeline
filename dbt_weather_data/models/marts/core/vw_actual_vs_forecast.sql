@@ -18,7 +18,7 @@ abs(actual.temp - forecast.temp) as forecast_error,
 1-(abs(actual.temp - forecast.temp)/actual.temp ) as forecast_accuracy_percentage
 from {{ ref('fact_weather_actual') }} as actual
 join {{ ref('fact_weather_forecast') }} as forecast
-  on actual.datetime_id = forecast.datetime_id and actual.location_id = forecast.location_id
+  on actual.weather_id = forecast.forecast_id
 join {{ ref('dim_datetime') }} as dim_datetime
   on actual.datetime_id = dim_datetime.datetime_id
 join {{ ref('dim_weather_condition') }} as dim_weather_condition_a
