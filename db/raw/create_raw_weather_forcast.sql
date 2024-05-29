@@ -22,3 +22,8 @@ CREATE TABLE IF NOT EXISTS public_stage.raw_weather_forecast (
     forecast_datetime TIMESTAMP,
     ingestion_datetime TIMESTAMP
 );
+
+CREATE INDEX idx_forecast_id ON public_stage.raw_weather_actual(weather_id);
+CREATE INDEX idx_forecast_datetime ON public_stage.raw_weather_actual(observation_datetime);
+CREATE INDEX idx_ingestion_datetime ON public_stage.raw_weather_actual(ingestion_datetime);
+
