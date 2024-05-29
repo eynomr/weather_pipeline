@@ -1,4 +1,5 @@
 <img src='https://www.getdbt.com/ui/img/logos/dbt-logo.svg' alt='dbt logo' width='100' height='40' />
+
 ## Overview
 We use dbt to transform the raw data into dimenstional and fact tables. The dbt project is integrated with the dagster project and utilizes dbt assets for data transformation.
 
