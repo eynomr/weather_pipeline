@@ -152,8 +152,6 @@ models:
         description: ground level of the weather
       - name: visibility
         description: visibility of the weather
-        tests:
-          - not_null
       - name: wind_speed
         description: wind speed of the weather
         tests:
@@ -234,8 +232,6 @@ models:
         description: ground level of the weather
       - name: visibility
         description: visibility of the weather
-        tests:
-          - not_null
       - name: wind_speed
         description: wind speed of the weather
         tests:

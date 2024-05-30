@@ -10,8 +10,15 @@ from dagster import (
 from ...resources import OpenWeatherMapResource, PostgresResource
 import pandas as pd
 import datetime
+from typing import List
+from requests import Timeout
 
-
+@asset()
+def test_asset(context: AssetExecutionContext):
+    try:
+        raise Timeout
+    except Timeout as e:
+        context.log.error(f"Failed to fetch data for location due to timeout: {str(e)}")
 
 @asset(        
         compute_kind="python",
@@ -34,7 +41,7 @@ def all_locations(postgres: PostgresResource) -> pd.DataFrame:
         description="Fetches weather data from OpenWeather API",
         metadata={"api": "OpenWeatherMap API v2.5"}
 )
-def fetch_weather_actual(context: AssetExecutionContext, all_locations, open_weather_map: OpenWeatherMapResource) -> pd.DataFrame:
+def fetch_weather_actual(context: AssetExecutionContext, all_locations: List, open_weather_map: OpenWeatherMapResource) -> pd.DataFrame:
     """
     Fetches actual data from OpenWeather API.
     Resource: OpenWeatherMapResource
@@ -44,7 +51,8 @@ def fetch_weather_actual(context: AssetExecutionContext, all_locations, open_wea
     for location in all_locations:
         location_id, lat, long = location        
         try:
-            data = open_weather_map.get_actual_weather(lat=lat, long=long)                      
+            data = open_weather_map.get_actual_weather(lat=lat, long=long) 
+            context.log.info(f"Actual data for location {location_id} fetched")                     
             weather_data.append({
                 "location_id": location_id, # from dim_location
                 "weather_type": data['weather'][0]['main'],
@@ -57,7 +65,7 @@ def fetch_weather_actual(context: AssetExecutionContext, all_locations, open_wea
                 "humidity": data['main']['humidity'],
                 "sea_level": data.get('main', {}).get('sea_level', None), 
                 "ground_level": data.get('main', {}).get('grnd_level', None),
-                "visibility": data['visibility'],
+                "visibility": data.get('visibility', None),
                 "wind_speed": data['wind']['speed'],
                 "wind_degree": data['wind']['deg'],
                 "wind_gust": data.get('wind', {}).get('gust', None),
@@ -71,22 +79,28 @@ def fetch_weather_actual(context: AssetExecutionContext, all_locations, open_wea
                 "sunset": data['sys']['sunset'],
                 "ingestion_datetime": datetime.datetime.now().timestamp()
             })
-        except RetryRequested as e:
-            context.log.warning(f"Retrying due to error: {str(e)}")
-            raise e
+        except Timeout as e:
+            context.log.warn(f"Failed to fetch data for location {location} due to timeout: {str(e)}")
+        except KeyError as e:
+            context.log.error(f"Failed to fetch data for location {location} due to key error: {str(e)}")
+            raise Failure(f"Failed to fetch data for location {location} with error: {str(e)}")
         except Failure as e:
-            context.log.error(f"Failed to fetch locations: {str(e)}")
+            context.log.error(f"Failed to fetch data for location {location} with error: {str(e)}")
+            raise e
+        except Exception as e:
+            context.log.error(f"Failed to fetch data for location {location}: {str(e)}")
             raise e
         
     yield AssetMaterialization(asset_key="weather_actual", description="Fetched weather data from OpenWeather API")
     yield Output(value=weather_data, metadata={"Number of records" : len(weather_data), "Sample Data": weather_data[:5]})
+
 
 @asset(
         compute_kind="python",
         description="Loads raw weather data into the database",
         metadata={"schema": "public_stage", "table": "raw_weather_actual"}
 )
-def raw_weather_actual(context: AssetExecutionContext, fetch_weather_actual, postgres: PostgresResource):
+def raw_weather_actual(context: AssetExecutionContext, fetch_weather_actual: List, postgres: PostgresResource):
     """
     Loads the raw fetched actual data into the database.
     Resource: PostgresResource
@@ -160,7 +174,7 @@ def raw_weather_actual(context: AssetExecutionContext, fetch_weather_actual, pos
         description="Fetches forecast data from OpenWeather API",
         metadata={"api": "OpenWeatherMap API v2.5"}
 )
-def fetch_weather_forecast(context: AssetExecutionContext, all_locations, open_weather_map: OpenWeatherMapResource) -> pd.DataFrame:
+def fetch_weather_forecast(context: AssetExecutionContext, all_locations: List, open_weather_map: OpenWeatherMapResource) -> pd.DataFrame:
     """
     Fetches forecast data from OpenWeather API.
     Resource: OpenWeatherMapResource
@@ -171,6 +185,7 @@ def fetch_weather_forecast(context: AssetExecutionContext, all_locations, open_w
         location_id, lat, long = location        
         try:
             data = open_weather_map.get_forecast_weather(lat=lat, long=long)                      
+            context.log.info(f"Forecast data for location {location_id} fetched")
             data = data['list']
             for data in data:
                 weather_data.append({
@@ -196,11 +211,16 @@ def fetch_weather_forecast(context: AssetExecutionContext, all_locations, open_w
                     "forecast_datetime": data['dt'],
                     "ingestion_datetime": datetime.datetime.now().timestamp()
                 })
-        except RetryRequested as e:
-            context.log.warning(f"Retrying due to error: {str(e)}")
-            raise e
+        except Timeout as e:
+            context.log.warn(f"Failed to fetch data for location {location} due to timeout: {str(e)}")
+        except KeyError as e:
+            context.log.error(f"Failed to fetch data for location {location} due to key error: {str(e)}")
+            raise Failure(f"Failed to fetch data for location {location} with error: {str(e)}")
         except Failure as e:
-            context.log.error(f"Failed to fetch locations: {str(e)}")
+            context.log.error(f"Failed to fetch data for location {location} with error: {str(e)}")
+            raise e
+        except Exception as e:
+            context.log.error(f"Failed to fetch data for location {location}: {str(e)}")
             raise e
         
     yield AssetMaterialization(asset_key="weather_actual", description="Fetched weather data from OpenWeather API")
@@ -213,7 +233,7 @@ def fetch_weather_forecast(context: AssetExecutionContext, all_locations, open_w
         description="Loads raw forecast data into the database",
         metadata={"schema": "public_stage", "table": "raw_weather_forecast"}
 )
-def raw_weather_forecast(context: AssetExecutionContext, fetch_weather_forecast, postgres: PostgresResource):
+def raw_weather_forecast(context: AssetExecutionContext, fetch_weather_forecast: List, postgres: PostgresResource):
     """
     Loads the raw fetched forecast data into the database.
     Resouce: PostgresResource
