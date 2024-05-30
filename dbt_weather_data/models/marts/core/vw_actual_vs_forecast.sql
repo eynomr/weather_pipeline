@@ -14,8 +14,8 @@ dim_weather_condition_f.condition as forecast_condition,
 case when dim_weather_condition_a.condition = dim_weather_condition_f.condition then 1 else 0 end as condition_match,
 actual.temp as actual_temp,
 forecast.temp as forecast_temp,
-abs(actual.temp - forecast.temp) as forecast_error,
-1-(abs(actual.temp - forecast.temp)/actual.temp ) as forecast_accuracy_percentage
+round(cast(abs(actual.temp - forecast.temp) as numeric), 2) as forecast_error,
+round(cast(1-(abs(actual.temp - forecast.temp)/actual.temp) as numeric ), 2) as forecast_accuracy_percentage
 from {{ ref('fact_weather_actual') }} as actual
 join {{ ref('fact_weather_forecast') }} as forecast
   on actual.weather_id = forecast.forecast_id
