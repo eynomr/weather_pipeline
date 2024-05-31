@@ -1,5 +1,5 @@
 from dagster import ScheduleDefinition
-from ..jobs import actual_weather_job, forecast_weather_job
+from ..jobs import actual_weather_job, forecast_weather_job, daily_temp_job
 
 """SCHEDULE DEFINITIONS"""
 hourly_actual_weather_schedule = ScheduleDefinition(
@@ -12,4 +12,10 @@ daily_forecast_weather_schedule = ScheduleDefinition(
   name="daily_forecast_weather_schedule",
   cron_schedule="0 0 * * *",
   job=forecast_weather_job
+)
+
+daily_temp_schedule = ScheduleDefinition(
+  "daily_update_temp_schedule",
+  cron_schedule="0 0 * * *",
+  job=daily_temp_job
 )

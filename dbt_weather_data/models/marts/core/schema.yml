@@ -261,3 +261,107 @@ models:
         tests:
           - not_null
           - unique
+
+  - name: fact_daily_temp
+    description: fact table for daily aggregated temperature data
+    columns:
+      - name: location_id
+        description: unique identifier for each location, foreign key to dim_location
+        tests:
+          - not_null
+          - relationships:
+              to: ref('dim_location')
+              field: location_id
+      - name: date_location_id
+        description: unique identifier for each date and location and each record of this table
+        tests:
+          - unique
+      - name: date
+        description: date of the temperature data
+        tests:
+          - not_null
+      - name: avg_temp
+        description: average temperature of the day
+        tests:
+          - not_null
+      - name: min_temp
+        description: minimum temperature of the day
+        tests:
+          - not_null
+      - name: max_temp
+        description: maximum temperature of the day
+        tests:
+          - not_null
+
+  - name: fact_daily_forecast
+    description: fact table for daily aggregated forecast data
+    columns:
+      - name: location_id
+        description: unique identifier for each location, foreign key to dim_location
+        tests:
+          - not_null
+          - relationships:
+              to: ref('dim_location')
+              field: location_id
+      - name: date_location_id
+        description: unique identifier for each date and location and each record of this table
+        tests:
+          - unique
+      - name: date
+        description: date of the forecast data
+        tests:
+          - not_null
+      - name: avg_temp
+        description: average forecasted temperature of the day
+        tests:
+          - not_null
+      - name: min_temp
+        description: minimum forecasted temperature of the day
+        tests:
+          - not_null
+      - name: max_temp
+        description: maximum forecasted temperature of the day
+        tests:
+          - not_null
+      - name: avg_precipitation_probability
+        description: average precipitation probability of the day
+        tests:
+          - not_null
+
+  - name: feature_rolling_avg
+    description: feature table for rolling 12 hour average of temperature data
+    columns:
+      - name: rolling_id
+        description: unique identifier for each rolling record
+        tests:
+          - unique
+      - name: location_id
+        description: unique identifier for each location, foreign key to dim_location
+        tests:
+          - not_null
+          - relationships:
+              to: ref('dim_location')
+              field: location_id
+      - name: datetime_id
+        description: date and hour of the temperature data
+        tests:
+          - not_null
+          - relationships:
+              to: ref('dim_datetime')
+              field: datetime_id
+      - name: rolling_12hr_avg_temp
+        description: rolling 12 hour average temperature
+        tests:
+          - not_null
+      - name: rolling_12hr_avg_humidity
+        description: rolling 12 hour average humidity
+        tests:
+          - not_null
+      - name: rolling_12hr_avg_pressure
+        description: rolling 12 hour average pressure
+        tests:
+          - not_null
+      - name: rolling_12hr_avg_wind_speed
+        description: rolling 12 hour average wind speed
+        tests:
+          - not_null

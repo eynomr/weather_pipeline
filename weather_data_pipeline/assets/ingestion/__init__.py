@@ -13,13 +13,6 @@ import datetime
 from typing import List
 from requests import Timeout
 
-@asset()
-def test_asset(context: AssetExecutionContext):
-    try:
-        raise Timeout
-    except Timeout as e:
-        context.log.error(f"Failed to fetch data for location due to timeout: {str(e)}")
-
 @asset(        
         compute_kind="python",
         description="Fetches all locations from the database",

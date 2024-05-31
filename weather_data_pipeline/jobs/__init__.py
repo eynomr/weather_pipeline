@@ -29,3 +29,17 @@ forecast_weather_job = define_asset_job(
     "dbt_schema/analytics/fact_weather_forecast"
   ],
 )
+
+daily_temp_job = define_asset_job(
+  name="daily_temp_job",
+  selection=[
+    "dbt_schema/analytics/fact_daily_temp",
+  ]
+)
+
+daily_forecast_job = define_asset_job(
+  name="daily_forecast_job",
+  selection=[
+    "dbt_schema/analytics/fact_daily_forecast",
+  ]
+)

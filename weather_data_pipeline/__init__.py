@@ -1,10 +1,9 @@
 import os
 
 from dagster import (
-  Definitions,  
-  RunFailureSensorContext
+  Definitions
 )
-from dagster_slack import SlackResource, make_slack_on_run_failure_sensor
+from dagster_slack import SlackResource
 from .assets import (
   ingestion_assets,
 )
@@ -14,7 +13,12 @@ from .assets.dbt import (
 )
 from .resources import dbt_resource, OpenWeatherMapResource, PostgresResource
 from .jobs import actual_weather_job, forecast_weather_job
-from .schedules import hourly_actual_weather_schedule, daily_forecast_weather_schedule
+from .schedules import (
+  hourly_actual_weather_schedule,
+  daily_forecast_weather_schedule,
+  daily_temp_schedule    
+)
+from .sensors import daily_forecast_sensor, slack_on_run_failure
 
 
 """ASSETS DEFINITIONS"""
@@ -22,20 +26,6 @@ all_assets = [
   *ingestion_assets,
   dbt_project_assets
 ]
-
-
-"""SLACK MONITORING"""
-def slack_message_fn(context: RunFailureSensorContext):
-  return (
-    f"Job {context.dagster_run.job_name} failed!"
-    f"Error: {context.failure_event.message}"
-  )
-
-slack_on_run_failure = make_slack_on_run_failure_sensor(
-  channel="#analytics",
-  slack_token=os.getenv("SLACK_TOKEN"),
-  text_fn=slack_message_fn,
-)
 
 """DEFINITIONS"""
 defs = Definitions(
@@ -57,6 +47,6 @@ defs = Definitions(
       )
       },
     jobs=[actual_weather_job, forecast_weather_job],
-    schedules=[hourly_actual_weather_schedule, daily_forecast_weather_schedule],
-    sensors=[slack_on_run_failure]
+    schedules=[hourly_actual_weather_schedule, daily_forecast_weather_schedule, daily_temp_schedule],
+    sensors=[slack_on_run_failure, daily_forecast_sensor]
 )
